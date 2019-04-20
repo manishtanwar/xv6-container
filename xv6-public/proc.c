@@ -206,6 +206,10 @@ fork(void)
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
+	// **added @Manish
+	np->container_id = curproc->container_id;
+	// **
+
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
@@ -558,6 +562,8 @@ int create_container(){
 }
 
 int destroy_container(int container_id){
+	if(container_id >= NPROC) return 0;
+
 	container_table.container[container_id].map_count = 0;
 	int i;
 	for(i=0;i<NPROC;i++){
@@ -570,6 +576,8 @@ int destroy_container(int container_id){
 }
 
 int join_container(int container_id){
+	if(container_table.allocated[container_id] == 0) return 0;
+
   return 0;
 }
 
