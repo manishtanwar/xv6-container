@@ -49,6 +49,10 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  // **added @Manish
+  uint container_id;           // container number
+  // **
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -56,3 +60,8 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+struct container{
+  int page_table[1000][2];		// page table for container
+  int map_count;              // count of mappings in the page table
+};

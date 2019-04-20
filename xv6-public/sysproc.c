@@ -89,3 +89,57 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_create_container(void){
+  return create_container();
+}
+
+int
+sys_destroy_container(void){
+  int container_id;
+  if(argint(0, &container_id) < 0)
+    return 0;
+  return destroy_container(container_id);
+}
+
+int
+sys_join_container(void){
+  int container_id;
+  if(argint(0, &container_id) < 0)
+    return 0;
+  return join_container(container_id);
+}
+
+int
+sys_leave_container(void){
+  return leave_container();
+}
+
+int
+sys_memory_log_on(void){
+  return memory_log_on();
+}
+
+int
+sys_memory_log_off(void){
+  return memory_log_off();
+}
+
+int
+sys_scheduler_log_on(void){
+  return scheduler_log_on();
+}
+
+int
+sys_scheduler_log_off(void){
+  return scheduler_log_off();
+}
+
+int
+sys_container_malloc(void){
+  int nbytes;
+  if(argint(0, &nbytes) < 0)
+    return 0;
+  return container_malloc(nbytes);
+}

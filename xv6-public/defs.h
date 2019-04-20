@@ -121,6 +121,16 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
+int             create_container(void);
+int             destroy_container(int container_id);
+int             join_container(int container_id);
+int             leave_container(void);
+int             memory_log_on(void);
+int             memory_log_off(void);
+int             scheduler_log_on(void);
+int             scheduler_log_off(void);
+int             container_malloc(int nbytes);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 

@@ -112,6 +112,9 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  // **added @Manish
+  p->container_id = 0;
+  // **
   return p;
 }
 
@@ -531,4 +534,65 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+struct{
+  struct spinlock lock;
+  struct container container[NPROC];
+  int allocated[NPROC];               // which containers are allocated(boolean array)
+} container_table;
+
+
+int create_container(){
+  acquire(&container_table.lock);
+	int i;
+  for(i=1;i<NPROC;i++){
+    if(container_table.allocated[i] == 0){
+      container_table.allocated[i] = 1;
+      release(&container_table.lock);
+      return i;
+    }
+  }
+  release(&container_table.lock);
+  return 0;
+}
+
+int destroy_container(int container_id){
+	container_table.container[container_id].map_count = 0;
+	int i;
+	for(i=0;i<NPROC;i++){
+		if(ptable.proc[i].container_id == container_id){
+			kill(ptable.proc[i].pid);
+		}
+	}
+	container_table.allocated[container_id] = 0;
+	return 1;
+}
+
+int join_container(int container_id){
+  return 0;
+}
+
+int leave_container(void){
+  return 0;
+}
+
+int memory_log_on(void){
+  return 0;
+}
+
+int memory_log_off(void){
+  return 0;
+}
+
+int scheduler_log_on(void){
+  return 0;
+}
+
+int scheduler_log_off(void){
+  return 0;
+}
+
+int container_malloc(int nbytes){
+  return 0;
 }
