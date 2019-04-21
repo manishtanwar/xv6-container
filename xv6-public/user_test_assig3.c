@@ -5,44 +5,27 @@
 int
 main(void)
 {
-	// printf(1,"log : %d\n",scheduler_log_on());
-	// create_container();
-	// create_container();
-	// printf(1,"join : %d\n",join_container(1));
-	// sleep(10);
-
-	// int a = fork();
-	// if(a == 0){
-	// 	sleep(10);
-	// 	printf(1,"join2 : %d\n",join_container(2));
-	// 	printf(1,"leave : %d\n",leave_container());
-	// 	printf(1,"join3 : %d\n",join_container(2));
-	// 	sleep(10);
-	// }
-	// sleep(20);
-	// if(a > 0) wait();
-
 	create_container();
 	create_container();
 	create_container();
-	ps();
 
 	if(fork() == 0){
 		join_container(1);
 		sleep(50);
-		ps();
+		leave_container();
 		exit();
 	}
 	if(fork() == 0){
 		join_container(1);
 		sleep(50);
-		ps();
+		leave_container();
 		exit();
 	}
 	if(fork() == 0){
 		join_container(1);
-		sleep(50);
+		sleep(30);
 		ps();
+		leave_container();
 		exit();
 	}
 
@@ -50,18 +33,24 @@ main(void)
 		join_container(2);
 		sleep(35);
 		ps();
+		leave_container();
 		exit();
 	}
 	if(fork() == 0){
 		join_container(3);
 		sleep(30);
 		ps();
+		leave_container();
 		exit();
 	}
-	// scheduler_log_on();
-	// int i = 0;
-	// while(i<1e8) i++;
-	// scheduler_log_off();
+	scheduler_log_on();
+	sleep(5);
+	scheduler_log_off();
+
+	// sleep(100);
+	destroy_container(1);
+	destroy_container(2);
+	destroy_container(3);
 	wait();
 	exit();
 }

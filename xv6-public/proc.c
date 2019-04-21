@@ -392,7 +392,7 @@ scheduler(void)
           continue;
         }
         if(scheduler_log)
-          cprintf("The process with pid %d scheduled, Running on Container %d\n",p->pid,cid);
+          cprintf("Container %d scheduled, scheduling process with pid %d\n",cid,p->pid);
         c->proc = p;
         switchuvm(p);
         p->state = RUNNING;
@@ -608,29 +608,41 @@ int create_container(){
 int destroy_container(int container_id){
 	if(container_id >= NPROC || container_id <= 0) return 0;
 
-	// *** delete files created in this container
+	//FIXME: *** delete files created in this container
 
-	container_table.container[container_id].map_count = 0;
 	int i;
 	for(i=0;i<NPROC;i++){
 		if(ptable.proc[i].container_id == container_id){
+      ptable.proc[i].container_id = 0;
 			kill(ptable.proc[i].pid);
 		}
 	}
+  acquire(&container_table.lock);
+	container_table.container[container_id].map_count = 0;
 	container_table.allocated[container_id] = 0;
+  release(&container_table.lock);
 	return 1;
 }
 
+// TODO: here
 int join_container(int container_id){
 	if(container_id >= NPROC || container_id <= 0) return 0;
-	if(container_table.allocated[container_id] == 0) return 0;
 	if(myproc()->container_id > 0) return 0;
+  
+  acquire(&container_table.lock);	
+  if(container_table.allocated[container_id] == 0){
+    release(&container_table.lock);    
+    return 0;
+  }
   myproc()->container_id = container_id;
+  release(&container_table.lock);
   return 1;
 }
 
 int leave_container(void){
+  acquire(&ptable.lock);
   myproc()->container_id = 0;
+  release(&ptable.lock);
   return 0;
 }
 
