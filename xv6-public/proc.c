@@ -7,10 +7,20 @@
 #include "proc.h"
 #include "spinlock.h"
 
+// **added @Manish
+int scheduler_log, memory_log;
+// **
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+
+struct{
+  struct spinlock lock;
+  struct container container[NPROC];
+  int allocated[NPROC];               // which containers are allocated(boolean array)
+} container_table;
 
 static struct proc *initproc;
 
@@ -340,8 +350,12 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      // **added @Manish
+      if(p->state != RUNNABLE || p->container_id > 0)
         continue;
+      if(scheduler_log)
+        cprintf("The process with pid %d scheduled, Running on HOST\n",p->pid);
+      // **
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -357,8 +371,43 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
-    release(&ptable.lock);
 
+    // **added @Manish
+    int cid = 0;
+    for(cid=1;cid<NPROC;cid++){
+      if(container_table.allocated[cid] == 0)
+        continue;
+      
+      int round = 0;
+      int j = container_table.container[cid].schd_rrobin_mkr;
+      if(scheduler_log)
+        cprintf("Container %d scheduled\n");
+
+      while(round < NPROC){
+        p = &ptable.proc[j];
+        
+        if(p->state != RUNNABLE || p->container_id != cid){
+          j = (j+1)%NPROC;
+          round++;
+          continue;
+        }
+        if(scheduler_log)
+          cprintf("The process with pid %d scheduled, Running on Container %d",p->pid,cid);
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+        c->proc = 0;
+
+        j = (j+1)%NPROC;
+        container_table.container[cid].schd_rrobin_mkr = j;
+        break;
+      }
+    }
+    // **
+    
+    release(&ptable.lock);
   }
 }
 
@@ -540,19 +589,14 @@ procdump(void)
   }
 }
 
-struct{
-  struct spinlock lock;
-  struct container container[NPROC];
-  int allocated[NPROC];               // which containers are allocated(boolean array)
-} container_table;
-
-
 int create_container(){
   acquire(&container_table.lock);
 	int i;
   for(i=1;i<NPROC;i++){
     if(container_table.allocated[i] == 0){
       container_table.allocated[i] = 1;
+	    container_table.container[i].map_count = 0;
+      container_table.container[i].schd_rrobin_mkr = 0;
       release(&container_table.lock);
       return i;
     }
@@ -562,7 +606,9 @@ int create_container(){
 }
 
 int destroy_container(int container_id){
-	if(container_id >= NPROC) return 0;
+	if(container_id >= NPROC || container_id <= 0) return 0;
+
+	// *** delete files created in this container
 
 	container_table.container[container_id].map_count = 0;
 	int i;
@@ -576,29 +622,36 @@ int destroy_container(int container_id){
 }
 
 int join_container(int container_id){
+	if(container_id >= NPROC || container_id <= 0) return 0;
 	if(container_table.allocated[container_id] == 0) return 0;
-
-  return 0;
+	if(myproc()->container_id > 0) return 0;
+  myproc()->container_id = container_id;
+  return 1;
 }
 
 int leave_container(void){
+  myproc()->container_id = 0;
   return 0;
 }
 
 int memory_log_on(void){
-  return 0;
+  memory_log = 1;
+  return 1;
 }
 
 int memory_log_off(void){
-  return 0;
+  memory_log = 0;
+  return 1;
 }
 
 int scheduler_log_on(void){
-  return 0;
+  scheduler_log = 1;
+  return 1;
 }
 
 int scheduler_log_off(void){
-  return 0;
+  scheduler_log = 0;
+  return 1;
 }
 
 int container_malloc(int nbytes){
