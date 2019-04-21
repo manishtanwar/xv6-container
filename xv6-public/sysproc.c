@@ -143,3 +143,8 @@ sys_container_malloc(void){
     return 0;
   return container_malloc(nbytes);
 }
+
+int sys_ps(void){
+  ps_print_list();
+  return 1;
+}

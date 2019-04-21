@@ -32,6 +32,7 @@ int memory_log_off(void);
 int scheduler_log_on(void);
 int scheduler_log_off(void);
 void* container_malloc(uint);
+int ps(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

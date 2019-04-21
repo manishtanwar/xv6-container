@@ -112,6 +112,7 @@ extern int sys_memory_log_off(void);
 extern int sys_scheduler_log_on(void);
 extern int sys_scheduler_log_off(void);
 extern int sys_container_malloc(void);
+extern int sys_ps(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -144,6 +145,7 @@ static int (*syscalls[])(void) = {
 [SYS_scheduler_log_on]    sys_scheduler_log_on,
 [SYS_scheduler_log_off]   sys_scheduler_log_off,
 [SYS_container_malloc]    sys_container_malloc,
+[SYS_ps]                  sys_ps,
 };
 
 void

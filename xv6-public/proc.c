@@ -380,8 +380,8 @@ scheduler(void)
       
       int round = 0;
       int j = container_table.container[cid].schd_rrobin_mkr;
-      if(scheduler_log)
-        cprintf("Container %d scheduled\n");
+      // if(scheduler_log)
+      //   cprintf("Container %d scheduled\n",cid);
 
       while(round < NPROC){
         p = &ptable.proc[j];
@@ -392,7 +392,7 @@ scheduler(void)
           continue;
         }
         if(scheduler_log)
-          cprintf("The process with pid %d scheduled, Running on Container %d",p->pid,cid);
+          cprintf("The process with pid %d scheduled, Running on Container %d\n",p->pid,cid);
         c->proc = p;
         switchuvm(p);
         p->state = RUNNING;
@@ -656,4 +656,18 @@ int scheduler_log_off(void){
 
 int container_malloc(int nbytes){
   return 0;
+}
+
+void
+ps_print_list(){
+  int i;
+  int cid = myproc()->container_id;
+  acquire(&ptable.lock);
+  for(i = 0; i < NPROC; i++){
+    if(ptable.proc[i].state != UNUSED && ptable.proc[i].container_id == cid){
+      if(cid == 0) cprintf("pid:%d, Running on : Host\n", ptable.proc[i].pid);
+      else cprintf("pid:%d, Running on Container : %d\n", ptable.proc[i].pid, cid);
+    }
+  }
+  release(&ptable.lock);
 }

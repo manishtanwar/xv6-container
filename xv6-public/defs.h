@@ -130,7 +130,7 @@ int             memory_log_off(void);
 int             scheduler_log_on(void);
 int             scheduler_log_off(void);
 int             container_malloc(int nbytes);
-
+void            ps_print_list(void);
 // swtch.S
 void            swtch(struct context**, struct context*);
 
