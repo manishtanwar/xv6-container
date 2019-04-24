@@ -605,11 +605,9 @@ int create_container(){
   return 0;
 }
 
+	//FIXME: *** delete files created in this container
 int destroy_container(int container_id){
 	if(container_id >= NPROC || container_id <= 0) return 0;
-
-	//FIXME: *** delete files created in this container
-
 	int i;
 	for(i=0;i<NPROC;i++){
 		if(ptable.proc[i].container_id == container_id){
@@ -639,6 +637,7 @@ int join_container(int container_id){
   return 1;
 }
 
+// TODO: Close Files created in this container
 int leave_container(void){
   acquire(&ptable.lock);
   myproc()->container_id = 0;
