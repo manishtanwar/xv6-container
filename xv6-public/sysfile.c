@@ -293,7 +293,26 @@ sys_open(void)
 
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
-
+  
+  int in_cont = 0;
+  int cid = myproc()->container_id;
+  char* _path = path;
+  if(in_cont == 2)
+    cprintf("hey!! This won't print");
+  
+  if(cid > 0){
+    in_cont = 1;
+    char new_path[550];
+    int i;
+    for(i=0;path[i];i++)
+      new_path[i] = path[i];
+    new_path[i++] = '$';
+    new_path[i++] = (cid / 10)+'0';
+    new_path[i++] = (cid % 10)+'0';
+    new_path[i] = '\0';
+    cprintf("%s, %s\n",path,new_path);
+    if((omode & 0x202) != 0) path = new_path;
+  }
   begin_op();
 
   if(omode & O_CREATE){
@@ -301,6 +320,13 @@ sys_open(void)
     if(ip == 0){
       end_op();
       return -1;
+    }
+    // a is avail but not a$01 then create and copy
+    if(in_cont){
+      if((ip = namei(path)) == 0){
+        end_op();
+        return -1;
+      }
     }
   } else {
     if((ip = namei(path)) == 0){
@@ -330,6 +356,9 @@ sys_open(void)
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+  if(cid > 0)
+    path = _path;
   return fd;
 }
 
