@@ -288,17 +288,26 @@ sys_open(void)
 {
   char *path;
   int fd, omode;
+  int _fd;
   struct file *f;
+  struct file *_f;
   struct inode *ip;
+  struct inode *_ip;
+  _ip = 0;
 
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
   
   int in_cont = 0;
+  int copy_flag = 0;
+  int cont_file_avail = 0;
+  int ori_file_avail = 0;
   int cid = myproc()->container_id;
   char* _path = path;
-  if(in_cont == 2)
-    cprintf("hey!! This won't print");
+  
+  begin_op();
+  if(namei(_path) != 0)
+    ori_file_avail = 1;
   
   if(cid > 0){
     in_cont = 1;
@@ -310,56 +319,149 @@ sys_open(void)
     new_path[i++] = (cid / 10)+'0';
     new_path[i++] = (cid % 10)+'0';
     new_path[i] = '\0';
-    cprintf("%s, %s\n",path,new_path);
-    if((omode & 0x202) != 0) path = new_path;
+    // cprintf("%s, %s\n",path,new_path);
+    path = new_path;
+    if(namei(path) != 0)
+      cont_file_avail = 1;
+
+    // read only mode
+    if((omode & 0x203) == 0 && ori_file_avail && !cont_file_avail){
+      path = _path;
+    }
+    if((omode & 0x003) && ori_file_avail && !cont_file_avail){
+      copy_flag = 1;
+    }
+    // cprintf("cont_file_avail : %d, ori_file_avail : %d, copy_flag : %d\n",cont_file_avail,ori_file_avail,copy_flag);
   }
-  begin_op();
 
   if(omode & O_CREATE){
-    ip = create(path, T_FILE, 0, 0);
-    if(ip == 0){
-      end_op();
-      return -1;
-    }
-    // a is avail but not a$01 then create and copy
     if(in_cont){
-      if((ip = namei(path)) == 0){
+      if(ori_file_avail && !cont_file_avail){
+        ip = create(_path, T_FILE, 0, 0);
+        if(ip == 0){
+          end_op();
+          return -1;
+        }
+      }
+      else{
+        ip = create(path, T_FILE, 0, 0);
+        if(ip == 0){
+          end_op();
+          return -1;
+        }
+      }
+    }
+    else{
+      ip = create(path, T_FILE, 0, 0);
+      if(ip == 0){
         end_op();
         return -1;
       }
     }
   } else {
-    if((ip = namei(path)) == 0){
+    if(copy_flag){
+      if((_ip = namei(_path)) == 0){
+        end_op();
+        return -1;
+      }
+      ilock(_ip);
+      if(_ip->type == T_DIR && omode != O_RDONLY){
+        iunlockput(_ip);
+        end_op();
+        return -1;
+      }
+      
+      ip = create(path, T_FILE, 0, 0);
+      if(ip == 0){
+        end_op();
+        return -1;
+      }
+    }
+    else{ 
+      if((ip = namei(path)) == 0){
+        end_op();
+        return -1;
+      }
+      ilock(ip);
+      if(ip->type == T_DIR && omode != O_RDONLY){
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+    }
+  }
+
+  if(copy_flag){
+    if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
+      if(f)
+        fileclose(f);
+      iunlockput(ip);
+      iunlockput(_ip);
       end_op();
       return -1;
     }
-    ilock(ip);
-    if(ip->type == T_DIR && omode != O_RDONLY){
+
+    if((_f = filealloc()) == 0 || (_fd = fdalloc(_f)) < 0){
+      if(_f)
+        fileclose(_f);
+      iunlockput(ip);
+      iunlockput(_ip);
+      end_op();
+      return -1;
+    }
+    iunlock(_ip);
+    iunlock(ip);
+    end_op();
+
+    f->type = FD_INODE;
+    f->ip = ip;
+    f->off = 0;
+    f->readable = !(omode & O_WRONLY);
+    f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+    _f->type = FD_INODE;
+    _f->ip = _ip;
+    _f->off = 0;
+    _f->readable = 1;
+    _f->writable = 1;
+
+    // copy the contents here
+    char ch;
+    while(1){
+      int a = fileread(_f,&ch,1);
+      // cprintf("wrote %d bytes\n",a);
+      if(a != 1) break;
+      filewrite(f,&ch,1);
+    }
+    cprintf("ref : %d\n", _f->ref);
+    // fileclose(_f);
+
+    path = _path;
+    // cprintf("fd : %d, file : %p\n",fd,f->ip);
+    return fd;
+  }
+  else{
+    if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
+      if(f)
+        fileclose(f);
       iunlockput(ip);
       end_op();
       return -1;
     }
-  }
-
-  if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
-    if(f)
-      fileclose(f);
-    iunlockput(ip);
+    iunlock(ip);
     end_op();
-    return -1;
-  }
-  iunlock(ip);
-  end_op();
 
-  f->type = FD_INODE;
-  f->ip = ip;
-  f->off = 0;
-  f->readable = !(omode & O_WRONLY);
-  f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+    f->type = FD_INODE;
+    f->ip = ip;
+    f->off = 0;
+    f->readable = !(omode & O_WRONLY);
+    f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
-  if(cid > 0)
+    
     path = _path;
-  return fd;
+    // cprintf("fd : %d, file : %p\n",fd,f->ip);
+    return fd;
+  }
 }
 
 int
