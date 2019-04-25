@@ -1,0 +1,31 @@
+\begin{enumerate}
+    \lstinputlisting[language=C]{f1.c}
+    \item \textbf{Container creation}
+        \begin{itemize}
+            \item Allocates the available unused data structure to be used as a container and returns the id. This id acts as a pointer to access the data structure
+            \item To ensure the locality of data structure w.r.t container, a unique id is associated with each data structure which is referred as container id. 
+            \item Creation also initialises local fields marker for round robin scheduler within the container.
+            \item Return type: if a data structure is succesffuly allocated then the container id, as defined above is returned else 0.
+        \end{itemize}
+        
+    \item \textbf{Deleting a container}
+        \begin{itemize}
+            \item All the processes associated with the container are killed and the data structure corresponding to given container id is de-allocated.
+            \item Return type: if the given id corresponds to some data structure that corresponds to a container, returns 1, else returns 0 
+            \item 
+        \end{itemize}
+        
+    \item \textbf{Joining a container}
+        \begin{itemize}
+            \item On joining the container id corresponding to that process is changed from 0 to given container id.
+            \item The global table storing mapping of pid to container id is updated. 
+            \item Return type: if the given container id
+            corresponds to a valid container then returns 1, else returns 0. Note that here valid is defined as that the container id be positive and some data structure is allocated to it, i.e. it is already created.
+        \end{itemize}
+        
+    \item \textbf{Leaving a container}
+        \begin{itemize}
+            \item When a process requests to leave the container, the container id corresponding to that process is made equal to 0, which, in our setting, corresponds to xv6 kernel. 
+        \end{itemize}
+        
+\end{enumerate}

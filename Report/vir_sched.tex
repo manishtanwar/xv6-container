@@ -1,0 +1,19 @@
+\begin{enumerate}
+    \item Kernel's scheduler is being modified to work for containers as well.
+    \item Implementation of virtual scheduler can be understood as consisting of two round-robin schedulers. The main scheduler acts on all the kernel processes and containers treating them all as a single unit. 
+    \item Every container also has it's own scheduler which maintains the last process that got scheduled within the container and also implements a round-robin approach within the container.
+    \item This implementation ensures that all that all processes and containers get equal scheduling and processes within a container also get equal scheduling.
+    \item This scheduling strategy is fair as kernel cannot see the processes inside the containers.
+    \item Consider the following example with two containers and 8 processes:
+    \begin{itemize}
+        \item $p0,p1$ in host
+        \item $p2,p3$ in container $c1$
+        \item $p4,p5,p6$ in container $c2$
+    \end{itemize}
+    Scheduling : $p0, p1, p2, p4, p0, p1, p3, p5, p0, p1, p2, p6 ...$
+\end{enumerate}
+
+\subsection*{Log Calls:}
+\lstinputlisting[language=C]{f2.c}
+It is implemented by keeping a toggle variable:
+\lstinputlisting[language=C]{f3.c}

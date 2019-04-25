@@ -1,0 +1,16 @@
+\begin{enumerate}
+    \item \textbf{ls }:
+        \begin{itemize}
+            \item Every file associated with a process running in a particular container has attached with it the container id, which uniquely identifies its locality w.r.t the container.
+            \item With the implementation of virtual file system as defined in above section, ls command only outputs the files that are local to the current container, which gives the appearance of virtualization required.
+        \end{itemize}
+    \item \textbf{ps }:
+        \begin{itemize}
+            \item Every process has associated with it a id which corresponds to the container id in which it belongs.
+            \item Hence similar to ls command, a check is made as to which container the RUNNING or WAITING process belongs and ps outputs accordingly.
+        \end{itemize}
+    \item  \textbf{Copy on Write (COW) }:
+        \begin{itemize}
+            \item 
+        \end{itemize}
+\end{enumerate}

@@ -182,6 +182,9 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_user_test_assig3\
+	_user_scheduling_testcase\
+	_user_ps_testcase\
+	_user_ls_testcase\
 	_demo\
 
 fs.img: mkfs README $(UPROGS)
@@ -219,7 +222,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
 ifndef CPUS
-CPUS := 2
+CPUS := 1
 endif
 QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
 
@@ -252,6 +255,9 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	demo\
 	user_test_assig3.c\
+	user_scheduling_testcase.c\
+	user_ps_testcase.c\
+	user_ls_testcase.c\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
 	printf.c umalloc.c\

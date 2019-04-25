@@ -1,0 +1,18 @@
+
+    \begin{enumerate}
+        \item In this assignment we worked on implementing virtualization in  our toy OS: xv6.
+        \item Container Manager and functionalities have been implemented in the kernal mode.
+    \end{enumerate}
+    We implemented container related services to obtain virtualisation in our OS. Various global and local data structures, w.r.t container, were introduced to achieve this: \\
+    
+\hspace*{-1cm} \textbf{Container table:}
+\lstinputlisting[language=C]{struct1.c}
+\begin{itemize}
+    \item It is a global struct, which maintains all the allocated and available containers
+    \item "allocated" array keeps track of empty and allocated containers.
+\end{itemize}
+
+\lstinputlisting[language=C]{f4.c}
+\begin{itemize}
+    \item Inside the \code{proc} struct a new variable \code{container\_id} is added which stores in which container this process lies.(Contains $0$ if process is not in any container)
+\end{itemize}

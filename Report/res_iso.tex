@@ -1,0 +1,27 @@
+\subsection*{3.1 Processes (\code{ps}):}
+\begin{enumerate}
+    \item A process inside container $c$ can only see the processes in the container $c$ and any process on host cannot see any process inside a container.
+    \item This isolation is implemented by \code{container\_id} of each process.
+    \item \textbf{Function} \code{ps}: If processer $p$ calls \code{ps()} then it only prints the processes which has same \code{container\_id} as of $p$.
+\end{enumerate}
+
+\subsection*{3.2 File System (\code{ls}):}
+
+\begin{enumerate}
+    \item Resource Isolation in files system to implement virtual file system is obtained by associating the files corresponding to a process with its container id.
+    \item Every file created by a process running in a particular container has attached with it the container id, which uniquely identifies its locality w.r.t the container. Filename is modified in the following manner for isolation:\\
+     \hspace*{2cm}   \code{filename} $\rightarrow$ \code{filename\$cid} \\
+     \hspace*{4cm} (\code{cid} = Container Id, cid is to be assumed with 2 digits)
+    \item \textbf{ls }:
+    \begin{itemize}
+        \item On a process in a container : With the implementation of virtual file system as defined above, ls command only outputs the files that are local to the current container(which contains \code{\$cid} in filename), which gives the appearance of virtualization required.
+        \item Careful implementation is done to prevent duplication printing in case of same file existing on the host(before joining the container) and within the container.
+        \item On host : print all the files which were created on the host.
+    \end{itemize}
+    
+\end{enumerate}
+
+% \item  \textbf{Copy on Write (COW) }:
+%         \begin{itemize}
+%             \item 
+%         \end{itemize}

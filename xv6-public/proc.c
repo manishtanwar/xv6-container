@@ -346,11 +346,15 @@ scheduler(void)
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
+    // int pid = 0;
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       // **added @Manish
+      // if(scheduler_log)
+      //   cprintf("pid : %d\n",pid);
+      // pid++;
+
       if(p->state != RUNNABLE || p->container_id > 0)
         continue;
       if(scheduler_log)
@@ -403,7 +407,9 @@ scheduler(void)
         j = (j+1)%NPROC;
         container_table.container[cid].schd_rrobin_mkr = j;
         break;
-      }
+      }      
+      // if(scheduler_log)
+      //   cprintf("cid : %d\n",cid);
     }
     // **
     

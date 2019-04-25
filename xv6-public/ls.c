@@ -99,6 +99,7 @@ ls(char *path)
         int j = 0;
         while(buf[j] != '\0')
           done_print_list[i][j] = buf[j], j++;
+        done_print_list[i][j] = '\0';
         if(i == cnt_done) cnt_done++;
       }
       else if(i == cnt_done && in_container_id == 0){
@@ -108,19 +109,15 @@ ls(char *path)
         int j = 0;
         while(buf[j] != '\0')
           done_print_list[i][j] = buf[j], j++;
+        done_print_list[i][j] = '\0';        
         if(i == cnt_done) cnt_done++;
-      }
-      if(i == cnt_done && (cid == in_container_id || in_container_id == 0)){
-        printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
-        i = 0;
-        // printf(1, "%d %d\n",i,cnt_done);
-        while(buf[i] != '\0')
-          done_print_list[cnt_done][i] = buf[i], i++;
-        cnt_done++;
       }
       // printf(1, "%s %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cid, in_container_id);
     }
     break;
+  }
+  for(i=0;i<cnt_done;i++){
+    printf(1, "%s %d %d %d\n", fmtname(done_print_list[i]), type[i], ino[i], size[i]);
   }
   close(fd);
 }
