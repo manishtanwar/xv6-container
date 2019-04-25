@@ -148,3 +148,7 @@ int sys_ps(void){
   ps_print_list();
   return 1;
 }
+
+int sys_get_cid(void){
+  return get_cid();
+}

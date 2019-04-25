@@ -309,7 +309,7 @@ sys_open(void)
   if(namei(_path) != 0)
     ori_file_avail = 1;
   
-  if(cid > 0){
+  if(cid > 0 || (myproc()->name[0] == 'l' && myproc()->name[1] == 's')){
     in_cont = 1;
     char new_path[550];
     int i;
@@ -433,7 +433,7 @@ sys_open(void)
       if(a != 1) break;
       filewrite(f,&ch,1);
     }
-    cprintf("ref : %d\n", _f->ref);
+    // cprintf("ref : %d\n", _f->ref);
     // fileclose(_f);
 
     path = _path;

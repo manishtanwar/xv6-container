@@ -131,6 +131,8 @@ int             scheduler_log_on(void);
 int             scheduler_log_off(void);
 int             container_malloc(int nbytes);
 void            ps_print_list(void);
+int             get_cid(void);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 

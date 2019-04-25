@@ -595,8 +595,7 @@ int create_container(){
   for(i=1;i<NPROC;i++){
     if(container_table.allocated[i] == 0){
       container_table.allocated[i] = 1;
-	    container_table.container[i].map_count = 0;
-      container_table.container[i].schd_rrobin_mkr = 0;
+	    container_table.container[i].schd_rrobin_mkr = 0;
       release(&container_table.lock);
       return i;
     }
@@ -616,7 +615,6 @@ int destroy_container(int container_id){
 		}
 	}
   acquire(&container_table.lock);
-	container_table.container[container_id].map_count = 0;
 	container_table.allocated[container_id] = 0;
   release(&container_table.lock);
 	return 1;
@@ -681,4 +679,8 @@ ps_print_list(){
     }
   }
   release(&ptable.lock);
+}
+
+int get_cid(){
+  return myproc()->container_id;
 }

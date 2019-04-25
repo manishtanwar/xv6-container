@@ -30,3 +30,4 @@
 #define SYS_scheduler_log_off   29   
 #define SYS_container_malloc    30
 #define SYS_ps                  31
+#define SYS_get_cid             32
