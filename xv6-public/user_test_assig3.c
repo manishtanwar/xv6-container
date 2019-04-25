@@ -5,8 +5,6 @@
 char *argv[] = {"ls"};
 
 void go(){
-    exec("sh", argv);
-
 	int pid = getpid();
 	char filename[6] = "file00";
 	filename[4] = pid / 10 + '0';

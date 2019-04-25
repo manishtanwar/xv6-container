@@ -10,24 +10,29 @@ char *argv1[] = {"cat","my_file",0};
 #define O_RDWR    0x002
 #define O_CREATE  0x200
 
-void go(){
-    exec("sh", argv);
-
-	int pid = getpid();
+void f1(){
+    int pid = getpid();
 	char filename[6] = "file00";
 	filename[4] = pid / 10 + '0';
 	filename[5] = pid % 10 + '0';
 	// printf(1,"%s \n", filename);
 	open(filename, O_CREATE);
+}
 
-	int fd = open(filename, O_WRONLY);
-	char msg[15] = "Modified by :00";
+void go(){
+    int pid = getpid();
+    printf(1,"\n\npid : %d\n\n",pid);
+    open("my_file", O_CREATE);
+	int fd = open("my_file", O_RDWR);
+	char msg[16] = "Modified by :00\n";
 	msg[13] = pid / 10 + '0';
 	msg[14] = pid % 10 + '0';
-	write(fd,msg,15);
-
-    sleep(50);
-    exec("cat", argv);
+	write(fd,msg,16);
+    sleep(200);
+    int f = fork();
+    // printf(1,"\n\ncid : %d\n\n",get_cid());
+    if(f == 0) exec("cat", argv1);
+    wait();
 }
 
 int
@@ -40,6 +45,7 @@ main(void)
 	if(fork() == 0){
 		join_container(c1);
 		sleep(200);
+        f1();
 		go();
 		leave_container();
 		exit();
@@ -47,6 +53,7 @@ main(void)
 	if(fork() == 0){
 		join_container(c1);
 		sleep(220);
+        f1();
 		go();
 		leave_container();
 		exit();
@@ -55,8 +62,15 @@ main(void)
 		join_container(c1);
 		sleep(30);
         printf(1,"ls on cid : %d\n",c1);
-		exec("ls", argv);
-		sleep(40);
+        int f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
+		sleep(60);
+        f1();
+        printf(1,"ls on cid : %d\n",c1);
+        f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
 		go();
 		leave_container();
 		exit();
@@ -66,8 +80,15 @@ main(void)
 		join_container(c2);
 		sleep(70);
         printf(1,"ls on cid : %d\n",c2);
-		exec("ls", argv);
-		sleep(40);
+		int f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
+		sleep(80);
+        f1();
+        printf(1,"ls on cid : %d\n",c2);
+        f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
 		go();
 		leave_container();
 		exit();
@@ -76,14 +97,21 @@ main(void)
 		join_container(c3);
 		sleep(100);
         printf(1,"ls on cid : %d\n",c3);
-		exec("ls", argv);
-		sleep(40);
+		int f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
+		sleep(100);
+        f1();
+        printf(1,"ls on cid : %d\n",c3);
+        f = fork();
+    	if(f==0) exec("ls", argv);
+        wait();
 		go();
 		leave_container();
 		exit();
 	}
 
-	sleep(400);
+	sleep(1000);
 	destroy_container(c1);
 	destroy_container(c2);
 	destroy_container(c3);
