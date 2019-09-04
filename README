@@ -1,3 +1,12 @@
+This is an extension of xv6, which supports containerization. Implemnted
+container manager, virtual scheduler, virtual page table, and virtual
+file system using copy-on-write mechanism.
+
+
+Original xv6 README is as follows:
+
+----------------------------------------------------------------------
+
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
 but is implemented for a modern x86-based multiprocessor using ANSI C.
