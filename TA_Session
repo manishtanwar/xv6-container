@@ -1,4 +1,0 @@
-1. On detatching(leaving) from a container -> (a)delete stuff (b)save stuff(files,pages)
-2. On exiting a container         -> destroy all processes within the container
-3. Join Container should fail when a process is already inside a container.
-4. 
